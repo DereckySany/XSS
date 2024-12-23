@@ -1,6 +1,4 @@
-import React, {
-  FC, useCallback, useState, useEffect, useMemo,
-} from 'react';
+import React, { FC, useCallback, useState, useEffect, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { useDropzone } from 'react-dropzone';
 import { lighten } from 'polished';
@@ -16,7 +14,7 @@ interface ICheckbox {
 }
 
 interface ButtonProps {
-  primary?: boolean;
+  $primary?: boolean;
 }
 
 const Button = styled.button<ButtonProps>`
@@ -52,21 +50,22 @@ const Button = styled.button<ButtonProps>`
     border-color: ${lighten(0.12, Color.LIGHT_RED)} !important;
   }
 
-  ${(props) => props.primary && css`
-    background: ${Color.LIGHT_RED} !important;
-    color: ${Color.WHITE} !important;
-
-    &:hover {
-      background-image: none !important;
-      background: ${lighten(0.05, Color.LIGHT_RED)} !important;
+  ${props =>
+    props.$primary &&
+    css`
+      background: ${Color.LIGHT_RED} !important;
       color: ${Color.WHITE} !important;
-      border-color: ${lighten(0.05, Color.LIGHT_RED)} !important;
-    }
-  `}
+
+      &:hover {
+        background: ${lighten(0.05, Color.LIGHT_RED)} !important;
+        color: ${Color.WHITE} !important;
+        border-color: ${lighten(0.05, Color.LIGHT_RED)} !important;
+      }
+    `}
 `;
 
 interface AreaProps {
-  desc: string;
+  $desc: string;
 }
 
 const Area = styled.div<AreaProps>`
@@ -81,10 +80,10 @@ const Area = styled.div<AreaProps>`
     margin-top: 8px;
   }
 
-  ${(props) => css`
+  ${props => css`
     &::after {
       position: absolute;
-      content: '${props.desc}';
+      content: '${props.$desc}';
       color: ${Color.LIGHT_GRAY};
       padding: 0 8px;
       background: white;
@@ -140,9 +139,12 @@ const DropMask = styled.div`
 
 const useCheckbox = ({ id, label, checked }: ICheckbox) => {
   const [value, setValue] = useState(checked);
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.checked);
-  }, [setValue]);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setValue(e.target.checked);
+    },
+    [setValue],
+  );
   const input = (
     <Label htmlFor={id}>
       <input id={id} checked={value} type="checkbox" onChange={handleChange} />
@@ -161,29 +163,32 @@ interface AppProps {
   onExportScripts: () => void;
 }
 
-const App: FC<AppProps> = ({
-  setting,
-  onSave,
-  onImportScripts,
-  onExportScripts,
-}: AppProps) => {
-  const [dark, darkCheckbox] = useCheckbox({ id: 'dark', label: 'Dark Theme', checked: setting.dark });
-  const [notice, noticeCheckbox] = useCheckbox({ id: 'notice', label: 'Execution Notice', checked: setting.notice });
+const App: FC<AppProps> = ({ setting, onSave, onImportScripts, onExportScripts }: AppProps) => {
+  const [dark, darkCheckbox] = useCheckbox({
+    id: 'dark',
+    label: 'Dark Theme',
+    checked: setting.dark,
+  });
 
   const [importState, setImportState] = useState<'' | 'success' | 'error'>('');
-  const handleDrop = useCallback(async (acceptedFiles: Array<File>) => {
-    const data = await fileHelper<Array<IScriptItem>>(acceptedFiles).catch(() => {
-      setImportState('error');
-    });
-    if (!Array.isArray(data)) return;
-    const savelist = importFormatHelper(data);
-    setImportState('success');
-    onImportScripts(savelist);
-  }, [onImportScripts]);
+  const handleDrop = useCallback(
+    async (acceptedFiles: Array<File>) => {
+      const data = await fileHelper<Array<Omit<IScriptItem, 'id'>>>(acceptedFiles).catch(() => {
+        setImportState('error');
+      });
+      if (!Array.isArray(data)) return;
+      const savelist = importFormatHelper(data);
+      setImportState('success');
+      onImportScripts(savelist);
+    },
+    [onImportScripts],
+  );
 
-  const {
-    getRootProps, getInputProps, open, isDragActive,
-  } = useDropzone({ onDrop: handleDrop, noClick: true, noKeyboard: true });
+  const { getRootProps, getInputProps, open, isDragActive } = useDropzone({
+    onDrop: handleDrop,
+    noClick: true,
+    noKeyboard: true,
+  });
 
   const renderDropMask = useMemo(() => {
     if (!isDragActive) return <></>;
@@ -197,36 +202,27 @@ const App: FC<AppProps> = ({
   }, [isDragActive]);
 
   useEffect(() => {
-    onSave({
-      dark,
-      notice,
-    } as ISetting);
-  }, [dark, notice, onSave]);
+    onSave({ dark } as ISetting);
+  }, [dark, onSave]);
 
-  /* eslint-disable react/jsx-props-no-spreading */
   return (
     <Container {...getRootProps()}>
-      <Area desc="Setting">
-        { darkCheckbox }
-        { noticeCheckbox }
-      </Area>
-      <Area desc="Scripts">
+      <Area $desc="Setting">{darkCheckbox}</Area>
+      <Area $desc="Scripts">
         <input {...getInputProps()} />
-        <Button type="button" primary onClick={open}>
-          {
-            importState === ''
-              ? null
-              : <img width="25" height="25" alt={importState} src={`../imgs/${importState}.svg`} />
-          }
+        <Button type="button" $primary onClick={open}>
+          {importState === '' ? null : (
+            <img width="25" height="25" alt={importState} src={`../imgs/${importState}.svg`} />
+          )}
           <span>Import Scripts</span>
         </Button>
-        <Button type="button" onClick={onExportScripts}>Export Scripts</Button>
+        <Button type="button" onClick={onExportScripts}>
+          Export Scripts
+        </Button>
       </Area>
-      { renderDropMask }
+      {renderDropMask}
     </Container>
   );
 };
-
-App.defaultProps = {};
 
 export default App;

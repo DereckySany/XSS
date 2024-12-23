@@ -15,6 +15,24 @@ body {
   -webkit-font-smoothing: antialiased;
   font-family: PingFangTC, "Microsoft JhengHei", 微軟正黑體, Helvetica, Arial, Verdana, sans-serif;
   font-weight: 400;
+  overflow: hidden;
+
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  ::-webkit-scrollbar-track {
+      background-color: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+      background-clip: content-box;
+      border: 3px solid transparent;
+      border-radius: 10px;
+      background-color: #ddd;
+  }
+  ::-webkit-scrollbar-corner {
+    background-color: transparent;
+  }
 }
 
 * {
@@ -35,34 +53,14 @@ footer {
 
 .dark {
   background-color: $color-dark-bg;
-
-  body {
-    background-color: $color-dark-bg;
+  ::-webkit-scrollbar-thumb {
+    background-clip: content-box;
+    border: 3px solid transparent;
+    border-radius: 10px;
+    background-color: #292929;
   }
 
   footer {
     filter: grayscale(55%);
-  }
-
-  ::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
-  }
-
-  ::-webkit-scrollbar-track,
-  ::-webkit-scrollbar-corner,
-  .CodeMirror-scrollbar-filler {
-    background: #2C2C2C;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #4B4B4B;
-    border-radius: 12px;
-    opacity: 0.5;
-    border: 3px solid #2C2C2C;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #5c5c5c;
   }
 }

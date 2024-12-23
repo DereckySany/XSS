@@ -1,13 +1,11 @@
-import React, {
-  FC, useCallback, useEffect, useState,
-} from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
+import { v1 as uuidv1 } from 'uuid';
 import styled from 'styled-components';
 import { js } from 'js-beautify';
-import { Controlled as CodeMirror, IControlledCodeMirror } from 'react-codemirror2';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/neo.css';
-import 'codemirror/theme/mbo.css';
-import 'codemirror/mode/javascript/javascript';
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
+import { ViewUpdate } from '@codemirror/view';
+import { vscodeDark, vscodeLight } from '@uiw/codemirror-theme-vscode';
 import { IScriptItem } from '../../types';
 import Stage from '../styled/Stage';
 import Input from '../styled/Input';
@@ -17,13 +15,9 @@ import { Color } from '../styled/theme';
 interface EditorProps {
   scriptData?: IScriptItem;
   dark?: boolean;
-  onSave: (value: IScriptItem) => void,
-  onDel: () => void,
-  onCancel: () => void,
-}
-
-interface ITextareaScript extends IControlledCodeMirror {
-  fullscreen: boolean;
+  onSave: (value: IScriptItem) => void;
+  onDel: () => void;
+  onCancel: () => void;
 }
 
 const defaultOptions = {
@@ -39,14 +33,14 @@ const InputTitle = styled(Input)`
   height: 26px;
   margin-bottom: 8px;
   display: inline-block;
-  color: ${(props) => props.theme.color.yallow};
-  border: 1px dashed ${(props) => props.theme.color.hoverLine};
-  font-weight: ${(props) => props.theme.fontWeight.bold};
+  color: ${props => props.theme.color.yallow};
+  border: 1px dashed ${props => props.theme.color.hoverLine};
+  font-weight: ${props => props.theme.fontWeight.bold};
   font-size: 14px;
 
   &::placeholder {
-    font-weight: ${(props) => props.theme.fontWeight.normal};
-    color:rgba(80, 80, 80, 0.35);
+    font-weight: ${props => props.theme.fontWeight.normal};
+    color: rgba(80, 80, 80, 0.35);
   }
 `;
 
@@ -56,35 +50,49 @@ const ButtonArea = styled.div`
   display: inline-flex;
 `;
 
-const TextareaScript = styled(CodeMirror)<ITextareaScript>`
+const TextareaScript = styled.div<{ $dark?: boolean }>`
   width: 100%;
   height: calc(100% - 36px);
 
-  .CodeMirror-vscrollbar,
-  .CodeMirror-hscrollbar {
+  > div {
+    height: 100%;
+  }
+
+  .cm-theme {
+    font-size: 12px;
+  }
+  .ͼ1.cm-focused {
     outline: none;
   }
 
-  .CodeMirror {
-    height: 100%;
-    box-shadow: ${(props) => props.theme.boxShadow};
-    border-radius: ${(props) => props.theme.borderRadius.lg};
-    padding: 0 ${(props) => ((props.fullscreen) ? 0 : 6)}px;
-    border: 1px dashed ${(props) => props.theme.color.hoverLine};
+  box-shadow: ${props => props.theme.boxShadow};
+  border-radius: ${props => props.theme.borderRadius.lg};
+  border: 1px dashed ${props => props.theme.color.hoverLine};
+  overflow: hidden;
+
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
   }
-  .CodeMirror-focused .CodeMirror-selected,
-  .CodeMirror-line::selection,
-  .CodeMirror-line > span::selection,
-  .CodeMirror-line > span > span::selection {
-    background: ${(props) => props.theme.color.selection} !important;
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-clip: content-box;
+    border: 3px solid transparent;
+    border-radius: 10px;
+    background-color: ${props => (props.$dark ? '#3e3e3e' : '#ddd')};
+  }
+  ::-webkit-scrollbar-corner {
+    background-color: transparent;
   }
 `;
 
 /* Editor Component */
 
 const Editor: FC<EditorProps> = ({
-  scriptData,
-  dark,
+  scriptData = undefined,
+  dark = false,
   onSave,
   onDel,
   onCancel,
@@ -94,11 +102,12 @@ const Editor: FC<EditorProps> = ({
   const [fullscreen, setFullscreen] = useState(false);
   const [options, setOptions] = useState({
     ...defaultOptions,
-    theme: dark ? 'mbo' : 'neo',
+    // theme: dark ? 'mbo' : 'neo',
   });
 
   const handleSave = useCallback(() => {
     const data: IScriptItem = {
+      id: scriptData?.id || uuidv1(),
       title: title ? title.trim() : '',
       code: code ? code.trim() : '',
       autoExecute: scriptData?.autoExecute || false,
@@ -113,9 +122,7 @@ const Editor: FC<EditorProps> = ({
   }, [onDel]);
 
   const handleFormat = useCallback(() => {
-    setCode(
-      js(code, { indent_size: 2 }),
-    );
+    setCode(js(code, { indent_size: 2 }));
   }, [code]);
 
   const handleToggleFullscreen = useCallback(() => {
@@ -127,7 +134,7 @@ const Editor: FC<EditorProps> = ({
     setTitle(event.target.value || '');
   }, []);
 
-  const handleCodeChange = useCallback((editor: unknown, data: unknown, value: string) => {
+  const handleCodeChange = useCallback((value: string, viewUpdate: ViewUpdate) => {
     setCode(value);
   }, []);
 
@@ -160,27 +167,17 @@ const Editor: FC<EditorProps> = ({
       <InputTitle
         type="text"
         maxLength={100}
-        placeholder="Please enter a script title"
+        placeholder="Script Title"
         value={title}
         onChange={handleTitleChange}
-        autoFocus
       />
       <ButtonArea>
-        <IconButton
-          type="button"
-          hoverColor={Color.LIGHT_RED}
-          title="delete"
-          onClick={handleDel}
-        >
+        <IconButton type="button" $hoverColor={Color.LIGHT_RED} title="delete" onClick={handleDel}>
           <svg width="24px" height="24px">
             <use xlinkHref="../imgs/icons.svg#del" />
           </svg>
         </IconButton>
-        <IconButton
-          type="button"
-          title="format"
-          onClick={handleFormat}
-        >
+        <IconButton type="button" title="format" onClick={handleFormat}>
           <svg width="24px" height="24px">
             <use xlinkHref="../imgs/icons.svg#format" />
           </svg>
@@ -189,28 +186,32 @@ const Editor: FC<EditorProps> = ({
           scale={0.9}
           type="button"
           title={fullscreen ? 'exit fullscreen' : 'fullscreen'}
-          onClick={handleToggleFullscreen}
-        >
+          onClick={handleToggleFullscreen}>
           <svg width="24px" height="24px">
-            <use xlinkHref={`../imgs/icons.svg#${fullscreen ? 'close_fullscreen' : 'fullscreen'}`} />
+            <use
+              xlinkHref={`../imgs/icons.svg#${fullscreen ? 'close_fullscreen' : 'fullscreen'}`}
+            />
           </svg>
         </IconButton>
-        <Button type="button" red onClick={handleSave}>Save</Button>
-        <Button type="button" gray onClick={onCancel}>Cancel</Button>
+        <Button type="button" $red onClick={handleSave}>
+          Save
+        </Button>
+        <Button type="button" $gray onClick={onCancel}>
+          Cancel
+        </Button>
       </ButtonArea>
-      <TextareaScript
-        value={code}
-        fullscreen={fullscreen}
-        onBeforeChange={handleCodeChange}
-        options={options}
-      />
+      <TextareaScript $dark={dark}>
+        <CodeMirror
+          width="100%"
+          height="100%"
+          value={code}
+          extensions={[javascript({ jsx: false, typescript: false })]}
+          onChange={handleCodeChange}
+          theme={dark ? vscodeDark : vscodeLight}
+        />
+      </TextareaScript>
     </Stage>
   );
-};
-
-Editor.defaultProps = {
-  scriptData: undefined,
-  dark: false,
 };
 
 export default Editor;

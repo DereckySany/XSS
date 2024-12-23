@@ -10,8 +10,15 @@ import { IScriptItem, MenuItemId } from '../types';
 // 導出所有腳本
 function exportScripts() {
   chrome.storage.local.get(
-    ['scripts'], (result: { scripts?: Array<IScriptItem> }) => {
-      const scriptsData = JSON.stringify(result.scripts);
+    ['scripts'],
+    (result: { scripts?: Array<IScriptItem | Omit<IScriptItem, 'id'>> }) => {
+      const scriptsData = JSON.stringify(
+        result.scripts?.map(script => ({
+          title: script.title,
+          code: script.code,
+          autoExecute: script.autoExecute,
+        })),
+      );
       // Save as file
       const url = `data:application/json;base64,${Base64.encode(scriptsData)}`;
       chrome.downloads.download({
@@ -37,17 +44,24 @@ chrome.runtime.onInstalled.addListener(() => {
   // 塞入預設 script example
   const scripts: Array<IScriptItem> = [
     {
+      id: '1',
       title: 'Inject Jquery',
       autoExecute: false,
-      code: js(`
+      code: js(
+        `
         var script = document.createElement('script');
         document.documentElement.appendChild(script);
         script.src = 'https://code.jquery.com/jquery-3.5.1.min.js';
-      `, { indent_size: 2 }),
-    }, {
+      `,
+        { indent_size: 2 },
+      ),
+    },
+    {
+      id: '2',
       title: 'Get Cookie',
       autoExecute: false,
-      code: js(`
+      code: js(
+        `
         function getCookie() {
           if (document.cookie.length > 0) {
             const cookies = document.cookie.split(';');
@@ -66,21 +80,20 @@ chrome.runtime.onInstalled.addListener(() => {
           return {};
         }
         alert(JSON.stringify(getCookie(), null, 2));
-      `, { indent_size: 2 }),
+      `,
+        { indent_size: 2 },
+      ),
     },
   ];
-  chrome.storage.local.get(
-    ['scripts'],
-    (result: { scripts?: Array<IScriptItem> }) => {
-      if (!result.scripts) {
-        void chrome.storage.local.set({ scripts });
-      }
-    },
-  );
+  chrome.storage.local.get(['scripts'], (result: { scripts?: Array<IScriptItem> }) => {
+    if (!result.scripts) {
+      void chrome.storage.local.set({ scripts });
+    }
+  });
 });
 
 // 點擊自訂選單時
-chrome.contextMenus.onClicked.addListener((info) => {
+chrome.contextMenus.onClicked.addListener(info => {
   if (info.menuItemId === MenuItemId.ABOUT_XSS) {
     void chrome.tabs.create({
       url: 'https://github.com/totofish/XSS',
@@ -90,7 +103,7 @@ chrome.contextMenus.onClicked.addListener((info) => {
   }
 });
 
-chrome.runtime.onMessage.addListener((event: { type: MenuItemId; }, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((event: { type: MenuItemId }, sender, sendResponse) => {
   switch (event.type) {
     case MenuItemId.EXPORT_SCRIPTS:
       exportScripts();

@@ -1,4 +1,6 @@
 import React, { FC, useCallback, useMemo } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import styled from 'styled-components';
 import ScriptItemBox from '../styled/ScriptItemBox';
 import SwitchButton from './SwitchButton';
@@ -13,7 +15,7 @@ const ScriptItemWrapper = styled.div`
 const CenterLine = styled.div`
   width: 1px;
   height: 23px;
-  background-image: linear-gradient(${(props) => props.theme.color.hoverLine} 60%, transparent 0%);
+  background-image: linear-gradient(${props => props.theme.color.hoverLine} 60%, transparent 0%);
   background-position: right;
   background-size: 1px 5px;
   background-repeat: repeat-y;
@@ -31,7 +33,7 @@ const HalfArea = styled.div`
   opacity: 0.35;
   position: absolute;
   cursor: pointer;
-  transition: ${(props) => props.theme.transitionTime};
+  transition: ${props => props.theme.transitionTime};
 
   &:nth-child(3) {
     margin-left: 50%;
@@ -79,37 +81,50 @@ const ScriptTitle = styled.div`
 
   .title {
     width: 100%;
-    color: ${(props) => props.theme.color.yallow};
+    color: ${props => props.theme.color.yallow};
     font-size: 14px;
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-weight: ${(props) => props.theme.fontWeight.bold};
+    font-weight: ${props => props.theme.fontWeight.bold};
   }
 `;
 
 /* ScriptItem Component */
 
 interface ScriptItemProps {
+  id: string | number;
   title: string;
   code: string;
   autoExecute: boolean;
   scriptIndex: number;
+  overlay?: boolean;
   onEdit: (scriptIndex: number) => void;
   onEmitCode: (scriptIndex: number) => void;
   onToggleAutoExecute: (scriptIndex: number) => void;
 }
 
 const ScriptItem: FC<ScriptItemProps> = ({
+  id,
   title,
   code,
   autoExecute,
   scriptIndex,
+  overlay = false,
   onEdit,
   onEmitCode,
   onToggleAutoExecute,
 }: ScriptItemProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isSorting } =
+    useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: overlay ? 1 : 0,
+    opacity: isDragging ? 0.1 : 1,
+  };
+
   const handleClickPlay = useCallback(() => {
     if (onEmitCode) onEmitCode(scriptIndex);
   }, [scriptIndex, onEmitCode]);
@@ -122,42 +137,48 @@ const ScriptItem: FC<ScriptItemProps> = ({
     if (onToggleAutoExecute) onToggleAutoExecute(scriptIndex);
   }, [scriptIndex, onToggleAutoExecute]);
 
-  const renderScript = useMemo(() => (
-    <>
-      <CenterLine />
-      <HalfArea onClick={handleClickPlay}>
-        <img alt="" src="../imgs/play.svg" />
-      </HalfArea>
-      <HalfArea onClick={handleClickSet}>
-        <img alt="" src="../imgs/settings.svg" />
-      </HalfArea>
-    </>
-  ), [handleClickPlay, handleClickSet]);
+  const renderScript = useMemo(
+    () => (
+      <>
+        <CenterLine />
+        <HalfArea onClick={handleClickPlay}>
+          <img alt="" src="../imgs/play.svg" />
+        </HalfArea>
+        <HalfArea onClick={handleClickSet}>
+          <img alt="" src="../imgs/settings.svg" />
+        </HalfArea>
+      </>
+    ),
+    [handleClickPlay, handleClickSet],
+  );
 
-  const renderEmptyScript = useMemo(() => (
-    <>
-      <FullArea onClick={handleClickSet}>
-        <img alt="" src="../imgs/settings.svg" />
-      </FullArea>
-    </>
-  ), [handleClickSet]);
+  const renderEmptyScript = useMemo(
+    () => (
+      <>
+        <FullArea onClick={handleClickSet}>
+          <img alt="" src="../imgs/settings.svg" />
+        </FullArea>
+      </>
+    ),
+    [handleClickSet],
+  );
 
   return (
-    <ScriptItemWrapper>
-      <SwitchButton title="Auto Execute" style={{ left: 8, top: 17 }} checked={autoExecute} onChange={handleToggleAutoExecute} />
+    <ScriptItemWrapper ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <SwitchButton
+        title="Auto Execute"
+        style={{ left: 8, top: 17 }}
+        checked={autoExecute}
+        onChange={handleToggleAutoExecute}
+      />
       <ScriptItemBox title={title}>
         <CodeIcon alt="" src={code ? '../imgs/code.svg' : '../imgs/no-code.svg'} />
         <ScriptTitle>
-          <div className="title">
-            { title }
-          </div>
+          <div className="title">{title}</div>
         </ScriptTitle>
-        <div className="mask">
-          { code ? renderScript : renderEmptyScript }
-        </div>
+        {!overlay && <div className="mask">{code ? renderScript : renderEmptyScript}</div>}
       </ScriptItemBox>
     </ScriptItemWrapper>
-
   );
 };
 

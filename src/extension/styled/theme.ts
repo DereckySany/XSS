@@ -6,7 +6,7 @@ export enum Color {
   YALLOW = '#FF9D00',
   WHITE = '#FFFFFF',
   DARK = '#35363A',
-  BLACK = '#2C2C2C',
+  BLACK = '#1E1E1E',
   RED = '#D0021B',
   LIGHT_RED = '#F32038',
   LIGHT_GRAY = '#DADADA',

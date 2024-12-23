@@ -9,6 +9,7 @@ export enum MenuItemId {
 }
 
 export interface IScriptItem {
+  id: string;
   title: string;
   code: string;
   // 重整網頁時立即執行
@@ -17,7 +18,6 @@ export interface IScriptItem {
 
 export interface ISetting {
   dark: boolean;
-  notice: boolean;
 }
 
 export enum StyleTheme {

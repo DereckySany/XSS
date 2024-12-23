@@ -1,15 +1,15 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import eslint from 'vite-plugin-eslint';
 
 const emptyOutDir = false;
 let format: 'module' | 'iife' = 'iife';
 const input: {
-  GUI?: string,
-  options?: string,
-  background?: string,
-  content?: string,
+  GUI?: string;
+  options?: string;
+  background?: string;
+  content?: string;
 } = {};
 
 switch (process.env.BUILD_INPUT) {
@@ -19,10 +19,10 @@ switch (process.env.BUILD_INPUT) {
     input.options = resolve(__dirname, 'src/options.html');
     break;
   case 'background':
-    input.background = 'extension/background.ts';
+    input.background = 'src/extension/background.ts';
     break;
   case 'content':
-    input.content = 'extension/content.ts';
+    input.content = 'src/extension/content.ts';
     break;
   default:
 }
@@ -30,9 +30,7 @@ switch (process.env.BUILD_INPUT) {
 // https://vitejs.dev/config/
 export default defineConfig({
   root: 'src',
-  plugins: [
-    react(),
-  ],
+  plugins: [react(), eslint()],
   publicDir: 'assets',
   build: {
     minify: 'terser',
@@ -61,4 +59,5 @@ export default defineConfig({
       },
     },
   },
+  envDir: __dirname,
 });

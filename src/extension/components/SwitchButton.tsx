@@ -12,7 +12,7 @@ const Switch = styled.label`
   pointer-events: auto;
 
   .switch-input {
-    display:none;
+    display: none;
   }
   .slider {
     position: absolute;
@@ -22,25 +22,25 @@ const Switch = styled.label`
     right: 0;
     bottom: 0;
     background-color: #8f8f8f;
-    transition: .4s;
-    box-shadow: 0px 0px 4px rgba(0,0,0,0.15) inset;
+    transition: 0.4s;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.15) inset;
   }
   .switch-input:checked + .slider {
-    background-color: ${(props) => shade(0.2, lighten(0.35, props.theme.color.red))};
+    background-color: ${props => shade(0.2, lighten(0.35, props.theme.color.red))};
   }
   .switch-input:focus + .slider {
-    box-shadow: 0 0 1px ${(props) => shade(0.2, lighten(0.35, props.theme.color.red))};
+    box-shadow: 0 0 1px ${props => shade(0.2, lighten(0.35, props.theme.color.red))};
   }
   .slider:before {
     position: absolute;
-    content: "";
+    content: '';
     height: 21px;
     width: 21px;
     left: -1px;
     bottom: -3px;
     background-color: white;
-    transition: .3s;
-    box-shadow: 0px 2px 5px rgba(0,0,0,0.20)
+    transition: 0.3s;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
   }
   .slider.round {
     border-radius: 12px;
@@ -50,7 +50,7 @@ const Switch = styled.label`
   }
   .switch-input:checked + .slider:before {
     transform: translateX(15px);
-    background-color: ${(props) => props.theme.color.red};
+    background-color: ${props => props.theme.color.red};
   }
 `;
 
@@ -65,8 +65,8 @@ interface SwitchButtonProps {
 
 const SwitchButton: FC<SwitchButtonProps> = ({
   checked,
-  title,
-  style,
+  title = '',
+  style = {},
   onChange,
 }: SwitchButtonProps) => (
   <Switch style={style} title={title}>
@@ -74,10 +74,5 @@ const SwitchButton: FC<SwitchButtonProps> = ({
     <span className="slider round" />
   </Switch>
 );
-
-SwitchButton.defaultProps = {
-  title: '',
-  style: {},
-};
 
 export default SwitchButton;

@@ -7,7 +7,9 @@ export default function fileHelper<T>(acceptedFiles: Array<File>): Promise<T> {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result !== 'string') return;
-        const importData = Base64.decode(reader.result.replace('data:application/json;base64,', ''));
+        const importData = Base64.decode(
+          reader.result.replace('data:application/json;base64,', ''),
+        );
         try {
           resolve(JSON.parse(importData));
         } catch (e) {
