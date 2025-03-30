@@ -1,49 +1,51 @@
+Claro, aqui está a tradução para o português:
+
 <img width="150" src="docs/Icon.png">
 
-[![GitHub license](https://img.shields.io/github/license/totofish/XSS.svg)](https://github.com/totofish/XSS/blob/master/LICENSE)
-[![NodeJS with Vite](https://github.com/totofish/XSS/actions/workflows/main.yml/badge.svg)](https://github.com/totofish/XSS/actions/workflows/main.yml)
+[![Licença do GitHub](about:sanitized)](/LICENSE)
+[![NodeJS com Vite](about:sanitized)](/actions/workflows/main.yml)
 
-## Introduction
+## Introdução
 
-此為 chrome extension 工具，可以注入自訂 `Script` 於當前網頁頁面中，例如將 Jquery 載入頁面來方便操作 DOM，或是讀取 cookie 資訊等任何其他想執行的 JS Script，用以方便作為測試或開發除錯等目的。
+Esta é uma ferramenta de extensão do Chrome que permite injetar `Scripts` personalizados na página da web atual. Por exemplo, você pode carregar o JQuery na página para facilitar a manipulação do DOM, ou ler informações de cookies, ou qualquer outro script JS que você queira executar, para facilitar testes ou depuração de desenvolvimento.
 
-## Extension Install
+## Instalação da Extensão
 
-至 [Chrome 線上應用程式商店](https://chrome.google.com/webstore/detail/xss/bebjbdbgpmgdlfehkibnmgmbkcniaeij) 安裝
+Instale a partir da [Chrome Web Store](https://chrome.google.com/webstore/detail/xss/bebjbdbgpmgdlfehkibnmgmbkcniaeij)
 
-## Auto Execute
+## Execução Automática
 
-v1.1.0 版新增 Auto Execute 功能，切換前方 Auto Execute 狀態後，重整網頁時會在一開始便直接執行 scripts，方便執行一些需要一開始便執行的任務，例如使用 [Polly.js](https://netflix.github.io/pollyjs/) 來處理 mock api 的行為。不過須自己注意所攥寫的 script 不會造成無限重整頁面。
+A versão v1.1.0 adicionou a funcionalidade de Execução Automática. Depois de ativar o estado de Execução Automática, os scripts serão executados diretamente no início ao recarregar a página, o que é conveniente para executar tarefas que precisam ser executadas no início, como usar [Polly.js](https://netflix.github.io/pollyjs/) para lidar com o comportamento de API simulada. No entanto, você deve prestar atenção para que o script que você escrever não cause um loop infinito de recarregamento da página.
 
-```js
-// 例如這一段 script 啟用 Auto Execute 後會一直重整頁面
-location.reload()
+```javascript
+// Por exemplo, este script continuará recarregando a página após a ativação da Execução Automática
+location.reload();
 ```
 
-## Extension
+## Extensão
 
 <img width="469" src="docs/dark_theme_1.png">
 <img width="800" src="docs/dark_theme_2.png">
 
-## Theme
+## Tema
 
-外掛小圖示按右鍵選擇 `選項` 可取消 `Dark Theme` 改使用 `Light Theme`
+Clique com o botão direito no pequeno ícone da extensão e selecione `Opções` para desativar o `Tema Escuro` e usar o `Tema Claro`.
 
 <img width="469" src="docs/light_theme_1.png">
 <img width="800" src="docs/light_theme_2.png">
 
-## Export and Import Scripts
+## Exportar e Importar Scripts
 
-對外掛小圖示按右鍵選擇 `Export Scripts` 會將目前所有 Scripts 下載為 `scripts.json`，也可將 `scripts.json` 檔案 Drag 進 XSS 開啟的視窗介面或透過 `選項` 功能 import scripts 便能匯入 Scripts 紀錄。
+Clique com o botão direito no pequeno ícone da extensão e selecione `Exportar Scripts` para baixar todos os scripts atuais como `scripts.json`. Você também pode arrastar o arquivo `scripts.json` para a interface da janela aberta do XSS ou importar registros de scripts por meio da função `Opções`.
 
-## Options
+## Opções
 
 <img width="469" src="docs/options.png">
 
-## Tip
+## Dica
 
-Extension 注入 script 時有使用 closure，因此變數不會污染到 window 上。如果需要取得全域層級的參數可以明確使用 window 或 this。
+A extensão usa um closure ao injetar o script, então as variáveis não poluirão a janela. Se você precisar obter parâmetros de nível global, pode usar explicitamente window ou this.
 
-```js
+```javascript
 console.log(this === window); // true
 ```
